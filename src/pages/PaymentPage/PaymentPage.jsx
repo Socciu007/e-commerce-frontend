@@ -16,7 +16,8 @@ import * as message from "../../components/Message/Message";
 import { updateUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { removeAllOrderProduct } from "../../redux/slices/orderSlide";
-import { PayPalButton } from "react-paypal-button-v2";
+import { PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import * as PaymentService from "../../services/PaymentService";
 import { useTranslation } from "react-i18next";
 
@@ -141,7 +142,6 @@ const PaymentPage = () => {
     isSuccess,
     isError,
   } = mutationAddOrder;
-  console.log("dataAdd", dataAdd);
 
   useEffect(() => {
     if (isSuccess && dataAdd?.status === "OK") {
@@ -385,14 +385,22 @@ const PaymentPage = () => {
               </div>
               {payment === "paypal" && sdkReady ? (
                 <div style={{ width: "320px" }}>
-                  <PayPalButton
-                    amount={Math.round(totalPriceMemo / 30000)}
-                    // shippingPreference="NO_SHIPPING" // default is "GET_FROM_FILE"
-                    onSuccess={onSuccessPaypal}
-                    onError={() => {
-                      alert("Error");
-                    }}
-                  />
+                  <PayPalScriptProvider options={{ "client-id": "your-client-id" }}>
+                    <PayPalButtons
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          purchase_units: [
+                            {
+                              amount: {
+                                value: Math.round(totalPriceMemo / 30000),
+                              },
+                            },
+                          ],
+                        });
+                      }}
+                      onApprove={onSuccessPaypal}
+                    />
+                  </PayPalScriptProvider>
                 </div>
               ) : (
                 <ButtonComponent

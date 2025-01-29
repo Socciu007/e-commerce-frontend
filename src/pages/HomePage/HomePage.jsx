@@ -43,8 +43,11 @@ const HomePage = () => {
     const res = await ProductService.getAllTypeProduct();
     if (res?.status === "OK") {
       setTypeProduct(res?.data);
+    } else {
+      setTypeProduct([]);
     }
   };
+
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["products", limit, searchDebounce],
